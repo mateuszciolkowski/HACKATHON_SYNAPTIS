@@ -1,5 +1,11 @@
+import HomePage from './components/HomePage.jsx'
+
 function App() {
-	return <div className='App'>Hello World!</div>
+	return (
+		<>
+			<HomePage />
+		</>
+	)
 }
 
 export default App

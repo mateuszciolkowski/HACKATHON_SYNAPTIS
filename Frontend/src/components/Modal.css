@@ -1,0 +1,62 @@
+/* src/components/Modal.css */
+
+.modal-overlay {
+	position: fixed; /* Pozycjonowanie na cały ekran */
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background-color: rgba(0, 0, 0, 0.6); /* Półprzezroczyste tło */
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 1000; /* Na wierzchu */
+}
+
+.modal-content {
+	background: white;
+	padding: 24px;
+	border-radius: 8px;
+	min-width: 320px;
+	max-width: 90%;
+	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+	z-index: 1001;
+	animation: fadeIn 0.3s ease-out;
+}
+
+.modal-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	border-bottom: 1px solid #eee;
+	padding-bottom: 12px;
+}
+
+.modal-header h2 {
+	margin: 0;
+}
+
+.modal-close-btn {
+	background: transparent;
+	border: none;
+	font-size: 1.75rem;
+	cursor: pointer;
+	line-height: 1;
+	padding: 0;
+}
+
+.modal-body {
+	padding-top: 16px;
+}
+
+/* Prosta animacja pojawienia się */
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: scale(0.9);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
