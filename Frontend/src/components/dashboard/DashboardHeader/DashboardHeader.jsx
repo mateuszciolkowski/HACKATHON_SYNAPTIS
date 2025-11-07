@@ -39,31 +39,81 @@ function DashboardHeader({ onMenuClick }) {
 	return (
 		<AppBar
 			position="fixed"
+			elevation={0}
 			sx={{
 				width: { md: `calc(100% - ${drawerWidth}px)` },
 				ml: { md: `${drawerWidth}px` },
 				zIndex: theme.zIndex.drawer + 1,
+				backgroundColor: '#ffffff',
+				borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
+				borderRadius: { md: '0 0 12px 12px' },
+				boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06)',
 			}}
 		>
-			<Toolbar>
+			<Toolbar
+				sx={{
+					minHeight: '64px !important',
+					px: { xs: 2, sm: 3 },
+				}}
+			>
 				<IconButton
-					color="inherit"
 					aria-label="open drawer"
 					edge="start"
 					onClick={onMenuClick}
-					sx={{ mr: 2, display: { md: 'none' } }}
+					sx={{ 
+						mr: 2, 
+						display: { md: 'none' },
+						color: 'rgba(0, 0, 0, 0.7)',
+						'&:hover': {
+							backgroundColor: 'rgba(0, 0, 0, 0.04)',
+						},
+					}}
 				>
 					<MenuIcon />
 				</IconButton>
-				<Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+				<Typography 
+					variant="h6" 
+					noWrap 
+					component="div" 
+					sx={{ 
+						flexGrow: 1,
+						color: 'rgba(0, 0, 0, 0.87)',
+						fontWeight: 600,
+						fontSize: '1.125rem',
+					}}
+				>
 					Witaj, {user?.first_name || user?.email || 'Użytkowniku'}!
 				</Typography>
-				<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-					<IconButton color="inherit">
+				<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+					<IconButton 
+						sx={{
+							color: 'rgba(0, 0, 0, 0.7)',
+							'&:hover': {
+								backgroundColor: 'rgba(0, 0, 0, 0.04)',
+							},
+						}}
+					>
 						<NotificationsIcon />
 					</IconButton>
-					<IconButton onClick={handleMenuOpen} color="inherit">
-						<Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}>
+					<IconButton 
+						onClick={handleMenuOpen}
+						sx={{
+							p: 0.5,
+							'&:hover': {
+								backgroundColor: 'transparent',
+							},
+						}}
+					>
+						<Avatar 
+							sx={{ 
+								width: 36, 
+								height: 36, 
+								bgcolor: 'primary.main',
+								fontWeight: 600,
+								fontSize: '0.875rem',
+								boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+							}}
+						>
 							{user?.first_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
 						</Avatar>
 					</IconButton>
@@ -78,6 +128,22 @@ function DashboardHeader({ onMenuClick }) {
 						transformOrigin={{
 							vertical: 'top',
 							horizontal: 'right',
+						}}
+						PaperProps={{
+							elevation: 8,
+							sx: {
+								mt: 1.5,
+								minWidth: 200,
+								borderRadius: 2,
+								boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+								'& .MuiMenuItem-root': {
+									px: 2,
+									py: 1.5,
+									'&:hover': {
+										backgroundColor: 'rgba(0, 0, 0, 0.04)',
+									},
+								},
+							},
 						}}
 					>
 						<MenuItem onClick={handleMenuClose}>
