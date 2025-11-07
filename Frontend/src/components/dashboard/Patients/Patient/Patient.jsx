@@ -1,13 +1,14 @@
-import { Chip } from "@mui/material"
+// src/components/dashboard/Patients/Patient/Patient.jsx
+import { Chip } from '@mui/material'
 
-const Patient = ({ name, age, condition }) => {
+const Patient = ({ firstName, lastName, dob, gender }) => {
 	return (
 		<>
 			<Chip
-                label={`Imię: ${name}, Wiek: ${age}, Stan: ${condition}`}
-                variant="outlined"
-                sx={{ margin: '5px' }}
-            />
+				label={`Pacjent: ${firstName} ${lastName}, Data Urodzenia: ${dob}, Płeć: ${gender}`}
+				variant='outlined'
+				sx={{ margin: '5px' }}
+			/>
 		</>
 	)
 }

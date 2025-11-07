@@ -5,7 +5,7 @@ import DashboardSidebar, { drawerWidth } from '../DashboardSidebar/DashboardSide
 
 // Importuj nowe komponenty stron
 import DashboardHome from '../DashboardHome/DashboardHome'
-import Patients from '../Patients/Patients'
+import Patients from '../Patients/PatientsView'
 import Calendar from '../Calendar/Calendar'
 
 function Dashboard() {
