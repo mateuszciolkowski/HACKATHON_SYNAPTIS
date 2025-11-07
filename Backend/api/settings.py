@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'security',
     'stress_classification',
+    'patient_management',
     'drf_spectacular',
 ]
 
