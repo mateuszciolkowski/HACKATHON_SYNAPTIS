@@ -1,16 +1,16 @@
-/* src/components/Modal.css */
+/* src/components/styles/Modal.css */
 
 .modal-overlay {
-	position: fixed; /* Pozycjonowanie na cały ekran */
+	position: fixed;
 	top: 0;
 	left: 0;
 	width: 100vw;
 	height: 100vh;
-	background-color: rgba(0, 0, 0, 0.6); /* Półprzezroczyste tło */
+	background-color: rgba(0, 0, 0, 0.6);
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	z-index: 1000; /* Na wierzchu */
+	z-index: 1000;
 }
 
 .modal-content {
@@ -49,7 +49,6 @@
 	padding-top: 16px;
 }
 
-/* Prosta animacja pojawienia się */
 @keyframes fadeIn {
 	from {
 		opacity: 0;
@@ -60,3 +59,4 @@
 		transform: scale(1);
 	}
 }
+

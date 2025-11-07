@@ -1,4 +1,4 @@
-/* src/components/Form.css */
+/* src/components/styles/Form.css */
 .form-container {
 	display: flex;
 	flex-direction: column;
@@ -37,3 +37,4 @@
 .form-button:hover {
 	background-color: #0056b3;
 }
+
