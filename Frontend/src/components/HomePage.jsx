@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-import Dashboard from './dashboard/Dashboard'
+import Dashboard from './dashboard/Dashboard/Dashboard'
 import LoginPage from './auth/LoginPage'
 import AuthContext from '../context/AuthContext'
 

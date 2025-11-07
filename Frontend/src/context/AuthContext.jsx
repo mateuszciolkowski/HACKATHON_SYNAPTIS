@@ -18,7 +18,7 @@ const axiosInstance = axios.create({
 
 // Add request interceptor to include auth token
 axiosInstance.interceptors.request.use(
-	(config) => {
+	config => {
 		const tokens = localStorage.getItem('authTokens')
 		if (tokens) {
 			try {
@@ -32,15 +32,15 @@ axiosInstance.interceptors.request.use(
 		}
 		return config
 	},
-	(error) => {
+	error => {
 		return Promise.reject(error)
 	}
 )
 
 // Add response interceptor to handle 401 errors
 axiosInstance.interceptors.response.use(
-	(response) => response,
-	async (error) => {
+	response => response,
+	async error => {
 		const originalRequest = error.config
 
 		// If 401 and not already retrying, try to refresh token
@@ -191,7 +191,9 @@ export const AuthProvider = ({ children }) => {
 				} else if (errorData.password) {
 					throw new Error(Array.isArray(errorData.password) ? errorData.password[0] : errorData.password)
 				} else if (errorData.non_field_errors) {
-					throw new Error(Array.isArray(errorData.non_field_errors) ? errorData.non_field_errors[0] : errorData.non_field_errors)
+					throw new Error(
+						Array.isArray(errorData.non_field_errors) ? errorData.non_field_errors[0] : errorData.non_field_errors
+					)
 				} else {
 					throw new Error(errorData.detail || 'Wystąpił błąd podczas rejestracji.')
 				}
@@ -226,7 +228,7 @@ export const AuthProvider = ({ children }) => {
 	/**
 	 * Sprawdź czy token jest ważny (nie wygasł)
 	 */
-	const isTokenExpired = (token) => {
+	const isTokenExpired = token => {
 		try {
 			const decoded = jwtDecode(token)
 			const currentTime = Date.now() / 1000
