@@ -1,20 +1,37 @@
-// src/components/LoginForm.js
-import React, { useState } from 'react'
-import './Form.css' // Wspólne style dla formularzy
+import React, { useState, useContext } from 'react'
+import AuthContext from '../context/AuthContext' // Importujemy kontekst
+import './Form.css'
 
-const LoginForm = () => {
+// Otrzymujemy props 'onSuccess', aby zamknąć modal
+function LoginForm({ onSuccess }) {
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
+	const [error, setError] = useState(null) // Stan do obsługi błędów API
 
-	const handleSubmit = e => {
+	// Pobieramy funkcję logowania z kontekstu
+	const { loginUser } = useContext(AuthContext)
+
+	const handleSubmit = async e => {
 		e.preventDefault()
-		// Tutaj normalnie wysyłałbyś dane do API
-		alert(`Logowanie użytkownika: ${email}`)
-		console.log({ email, password })
+		setError(null) // Resetuj błąd
+
+		try {
+			// Wywołujemy logikę logowania z kontekstu
+			await loginUser(email, password)
+			// Jeśli logowanie się powiodło (nie rzuciło błędu), zamykamy modal
+			onSuccess()
+		} catch (err) {
+			// Jeśli API zwróci błąd (np. 401 Unauthorized)
+			console.error(err)
+			setError('Nieprawidłowy email lub hasło.')
+		}
 	}
 
 	return (
 		<form onSubmit={handleSubmit} className='form-container'>
+			{/* Wyświetlanie błędu logowania */}
+			{error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
+
 			<div className='form-group'>
 				<label htmlFor='login-email'>Email</label>
 				<input id='login-email' type='email' value={email} onChange={e => setEmail(e.target.value)} required />
