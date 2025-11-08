@@ -57,6 +57,11 @@ CORS_ALLOW_HEADERS = [
     "x-csrftoken", "x-requested-with",
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    # Dodaj tu adresy, które są zaufane (np. Twój Frontend URL)
+    'nks0os084ogg4oogcwcss8cs.92.5.118.210.sslip.io',
+]
+
 CORS_ALLOW_CREDENTIALS = True
 
 # 🎯 POPRAWKA: Konfiguracja dla proxy Coolify (HTTPS)
