@@ -99,6 +99,108 @@ def create_session_simulation(
     return timeline, metadata
 
 
+def analyze_long_term_progress(visits_data: List[Dict[str, Any]]) -> str:
+    """
+    Analizuje długoterminowe postępy pacjenta na podstawie wszystkich wizyt i sesji.
+    
+    Args:
+        visits_data: Lista słowników zawierających dane wszystkich wizyt pacjenta wraz z sesjami
+    
+    Returns:
+        Długoterminowa analiza postępów i wnioski dla terapii
+    """
+    api_key = os.getenv('OPENAI_API_KEY')
+    if not api_key:
+        raise ValueError("OPENAI_API_KEY nie jest ustawiony w zmiennych środowiskowych")
+    
+    client = OpenAI(api_key=api_key)
+    
+    # Przygotuj dane do analizy długoterminowej
+    visits_summary = []
+    total_sessions = 0
+    
+    for visit_idx, visit in enumerate(visits_data, 1):
+        visit_sessions = visit.get('sessions', [])
+        visit_stats = {
+            'stress_levels': [],
+            'stress_percentage': 0,
+            'meditation_percentage': 0,
+            'amusement_percentage': 0
+        }
+        
+        # Zbierz statystyki ze wszystkich sesji wizyty
+        for session in visit_sessions:
+            timeline = session.get('timeline_data', [])
+            stress_levels = [point.get('stress_level', 0) for point in timeline]
+            visit_stats['stress_levels'].extend(stress_levels)
+            visit_stats['stress_percentage'] += session.get('stress_percentage', 0)
+            visit_stats['meditation_percentage'] += session.get('meditation_percentage', 0)
+            visit_stats['amusement_percentage'] += session.get('amusement_percentage', 0)
+        
+        # Oblicz średnie dla wizyty
+        num_sessions = len(visit_sessions)
+        if num_sessions > 0:
+            avg_stress = sum(visit_stats['stress_levels']) / len(visit_stats['stress_levels']) if visit_stats['stress_levels'] else 0
+            visit_stats['stress_percentage'] /= num_sessions
+            visit_stats['meditation_percentage'] /= num_sessions
+            visit_stats['amusement_percentage'] /= num_sessions
+        else:
+            avg_stress = 0
+        
+        visits_summary.append({
+            'visit_number': visit_idx,
+            'date': visit.get('date'),
+            'avg_stress': avg_stress,
+            'stress_percentage': visit_stats['stress_percentage'],
+            'meditation_percentage': visit_stats['meditation_percentage'],
+            'amusement_percentage': visit_stats['amusement_percentage'],
+            'psychologist_notes': visit.get('psychologist_notes', ''),
+            'ai_summary': visit.get('ai_summary', ''),
+            'num_sessions': num_sessions
+        })
+        total_sessions += num_sessions
+    
+    # Przygotuj prompt dla długoterminowej analizy
+    long_term_prompt = f"""Jako doświadczony psycholog, przeanalizuj postępy pacjenta na podstawie {len(visits_summary)} wizyt (łącznie {total_sessions} sesji terapeutycznych).
+
+Historia wizyt:
+{chr(10).join([f'Wizyta {v["visit_number"]} ({v["date"]}):' + 
+               f' Liczba sesji: {v["num_sessions"]},' +
+               f' Średni stres: {v["avg_stress"]:.1f}/10,' +
+               f' Stres: {v["stress_percentage"]:.1f}%,' +
+               f' Medytacja: {v["meditation_percentage"]:.1f}%,' +
+               f' Rozrywka: {v["amusement_percentage"]:.1f}%' +
+               (f'\\nNotatki psychologa: {v["psychologist_notes"]}' if v["psychologist_notes"] else '') +
+               (f'\\nPodsumowanie AI: {v["ai_summary"]}' if v["ai_summary"] else '')
+               for v in visits_summary])}
+
+Stwórz kompleksową analizę długoterminową w języku polskim, która zawiera:
+1. Ogólny trend w radzeniu sobie ze stresem
+2. Wzorce reakcji na różne sytuacje stresowe
+3. Skuteczność stosowanych technik relaksacyjnych
+4. Konkretne rekomendacje do dalszej terapii
+5. Obszary wymagające szczególnej uwagi
+6. Zaobserwowane postępy i sukcesy
+
+Odpowiedź powinna być szczegółowa i profesjonalna, skupiająca się na długoterminowych wzorcach i rekomendacjach."""
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4",  # Używamy GPT-4 dla lepszej analizy długoterminowej
+            messages=[
+                {"role": "system", "content": "Jesteś doświadczonym psychologiem specjalizującym się w długoterminowej terapii i analizie postępów pacjentów. Twoje analizy są szczegółowe, profesjonalne i ukierunkowane na praktyczne rekomendacje."},
+                {"role": "user", "content": long_term_prompt}
+            ],
+            temperature=0.7,
+            max_tokens=1500
+        )
+        
+        return response.choices[0].message.content.strip()
+    
+    except Exception as e:
+        raise Exception(f"Błąd podczas generowania długoterminowej analizy AI: {str(e)}")
+
+
 def ai_analysis_service(session_data: Dict[str, Any]) -> str:
     """
     Generuje narracyjne podsumowanie sesji używając OpenAI.

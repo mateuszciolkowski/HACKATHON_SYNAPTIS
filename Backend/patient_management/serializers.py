@@ -11,7 +11,7 @@ class PatientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Patient
-        fields = ['id', 'first_name', 'last_name', 'dob', 'gender', 'pesel', 'notes', 'visits']
+        fields = ['id', 'first_name', 'last_name', 'dob', 'gender', 'pesel', 'notes', 'long_term_summary', 'visits']
 
 
 class SessionSerializer(serializers.ModelSerializer):
