@@ -13,7 +13,8 @@ import {
 	Divider,
 } from '@mui/material'
 // Importuj ikony, których potrzebujesz
-import { Dashboard as DashboardIcon, People, CalendarToday, PersonAdd as PersonAddIcon } from '@mui/icons-material'
+import { Dashboard as DashboardIcon, People, CalendarToday, PersonAdd as PersonAddIcon, Assessment as ReportIcon } from '@mui/icons-material'
+import logoImage from '../../../logo/logo.png'
 
 const drawerWidth = 240
 
@@ -42,6 +43,11 @@ function DashboardSidebar({ mobileOpen, onMobileClose, currentView, onViewChange
 			icon: <CalendarToday />,
 			view: 'calendar',
 		},
+		{
+			text: 'Raporty',
+			icon: <ReportIcon />,
+			view: 'report',
+		},
 	]
 
 	const drawer = (
@@ -50,12 +56,38 @@ function DashboardSidebar({ mobileOpen, onMobileClose, currentView, onViewChange
 				sx={{
 					display: 'flex',
 					alignItems: 'center',
-					justifyContent: 'center',
-					px: [2],
-					py: [1],
+					justifyContent: 'flex-start',
+					px: 2,
+					py: 2,
+					gap: 1.5,
+					minHeight: '80px !important',
+					borderBottom: '1px solid',
+					borderColor: 'rgba(74, 144, 226, 0.12)',
+					background: 'linear-gradient(135deg, rgba(74, 144, 226, 0.05) 0%, rgba(74, 144, 226, 0.02) 100%)',
 				}}>
-				<Typography variant='h6' noWrap component='div' sx={{ fontWeight: 600 }}>
-					Dashboard
+				<Box
+					component="img"
+					src={logoImage}
+					alt="Synaptis Logo"
+					sx={{
+						height: 40,
+						width: 'auto',
+						objectFit: 'contain',
+					}}
+				/>
+				<Typography 
+					variant='h6' 
+					noWrap 
+					component='div' 
+					sx={{ 
+						fontWeight: 700,
+						fontSize: '1.25rem',
+						background: 'linear-gradient(135deg, #4A90E2 0%, #3A7BC8 100%)',
+						backgroundClip: 'text',
+						WebkitBackgroundClip: 'text',
+						WebkitTextFillColor: 'transparent',
+					}}>
+					Synaptis
 				</Typography>
 			</Toolbar>
 			<Divider />

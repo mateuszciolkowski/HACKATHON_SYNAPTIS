@@ -1,0 +1,33 @@
+{
+  "metadata": {
+    "device": "Empatica E4",
+    "recording_date": "2025-01-15T12:00:00Z",
+    "duration_seconds": 300,
+    "sampling_rates": {
+      "ACC": 32,
+      "BVP": 64,
+      "EDA": 4,
+      "TEMP": 4
+    }
+  },
+  "signal": {
+    "wrist": {
+      "ACC": [
+        [0.6, 0.4, 0.9],
+        [0.62, 0.41, 0.92],
+        [0.58, 0.39, 0.88],
+        [0.61, 0.42, 0.91]
+      ],
+      "BVP": [0.6, 0.62, 0.58, 0.61, 0.59, 0.63],
+      "EDA": [0.4,
+        0.41,
+        0.39,
+        0.40
+      ],
+      "TEMP": [36.7, 36.8, 36.7, 36.7]
+    }
+  },
+  "label": null,
+  "note": "Przykładowe dane z normalnym poziomem aktywności - stan bazowy"
+}
+
