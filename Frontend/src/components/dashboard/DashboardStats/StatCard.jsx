@@ -36,12 +36,14 @@ function StatCard({ title, value, change, icon, color }) {
 						{icon}
 					</Box>
 				</Box>
-				<Chip
-					label={change}
-					size="small"
-					color={change.startsWith('+') ? 'success' : 'error'}
-					sx={{ fontSize: '0.75rem' }}
-				/>
+				{change && (
+					<Chip
+						label={change}
+						size="small"
+						color={change.startsWith('+') ? 'success' : change.startsWith('-') ? 'error' : 'default'}
+						sx={{ fontSize: '0.75rem' }}
+					/>
+				)}
 			</CardContent>
 		</Card>
 	)

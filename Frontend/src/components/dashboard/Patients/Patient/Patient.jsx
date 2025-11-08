@@ -23,6 +23,7 @@ const Patient = ({ firstName, lastName, dob, gender, onClick }) => {
 				},
 				borderRadius: 2, // Łagodniejsze rogi
 				width: '100%', // Kafelek wypełni swoją kolumnę w siatce
+				minHeight: '140px', // Taka sama wysokość jak kafelek dodawania
 			}}>
 			{/* 1. Placeholder zdjęcia (Avatar) */}
 			<Avatar

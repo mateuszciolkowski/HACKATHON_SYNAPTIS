@@ -48,12 +48,12 @@ function DashboardHeader({ onMenuClick, onViewChange }) {
 			position="fixed"
 			elevation={0}
 			sx={{
-				width: { md: `calc(100% - ${drawerWidth}px)` },
-				ml: { md: `${drawerWidth}px` },
-				zIndex: theme.zIndex.drawer + 1,
+				width: '100%',
+				left: 0,
+				right: 0,
+				zIndex: theme.zIndex.drawer - 1,
 				backgroundColor: '#ffffff',
 				borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
-				borderRadius: { md: '0 0 12px 12px' },
 				boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06)',
 			}}
 		>
@@ -61,6 +61,9 @@ function DashboardHeader({ onMenuClick, onViewChange }) {
 				sx={{
 					minHeight: '64px !important',
 					px: { xs: 2, sm: 3 },
+					maxWidth: { md: `calc(100% - ${drawerWidth}px)` },
+					marginLeft: { md: `${drawerWidth}px` },
+					marginRight: { md: 0 },
 				}}
 			>
 				<IconButton

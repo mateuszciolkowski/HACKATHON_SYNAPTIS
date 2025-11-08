@@ -7,25 +7,28 @@ import {
 	Grid, // Import komponentu Grid
 } from '@mui/material'
 import Patient from './Patient/Patient' // To jest teraz nasz nowy "kafelek"
+import AddPatientCard from './AddPatientCard'
 import PatientDetailView from './PatientDetailView'
 import { axiosInstance } from '../../../context/AuthContext'
 
-function PatientsView() {
+function PatientsView({ onViewChange }) {
 	const [patients, setPatients] = useState([])
 	const [listLoading, setListLoading] = useState(true)
 	const [selectedPatientId, setSelectedPatientId] = useState(null)
 
-	useEffect(() => {
-		const fetchPatients = async () => {
-			try {
-				const response = await axiosInstance.get('/api/patients/')
-				setPatients(response.data || [])
-			} catch (error) {
-				console.error('There was an error fetching the patients!', error)
-			} finally {
-				setListLoading(false)
-			}
+	const fetchPatients = async () => {
+		try {
+			setListLoading(true)
+			const response = await axiosInstance.get('/api/patients/')
+			setPatients(response.data.results || response.data || [])
+		} catch (error) {
+			console.error('There was an error fetching the patients!', error)
+		} finally {
+			setListLoading(false)
 		}
+	}
+
+	useEffect(() => {
 		fetchPatients()
 	}, [])
 
@@ -38,10 +41,17 @@ function PatientsView() {
 
 			{listLoading ? (
 				<CircularProgress />
-			) : patients.length > 0 ? (
+			) : (
 				// --- ZMIANA: Używamy Grid container ---
 				// 'spacing={3}' dodaje odstępy między kafelkami
 				<Grid container spacing={3}>
+					{/* Kafelek dodawania pacjenta - zawsze pierwszy */}
+					{onViewChange && (
+						<Grid item xs={12} sm={8} md={6} lg={4}>
+							<AddPatientCard onClick={() => onViewChange('add-patient')} />
+						</Grid>
+					)}
+					{/* Lista pacjentów */}
 					{patients.map(patient => (
 						// Każdy kafelek jest elementem siatki
 						// Ustawiamy responsywność:
@@ -60,10 +70,6 @@ function PatientsView() {
 						</Grid>
 					))}
 				</Grid>
-			) : (
-				<Typography variant='body1' color='text.secondary'>
-					Nie znaleziono pacjentów.
-				</Typography>
 			)}
 		</Box>
 	)

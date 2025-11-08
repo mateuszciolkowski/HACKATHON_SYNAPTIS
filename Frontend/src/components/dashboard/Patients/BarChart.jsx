@@ -6,7 +6,7 @@ const BarChart = ({ data }) => {
 	const svgRef = useRef()
 
 	useEffect(() => {
-		if (!data || data.length === 0) return
+		if (!data) return
 
 		const svg = d3.select(svgRef.current)
 		svg.selectAll('*').remove() // Wyczyść poprzedni wykres
@@ -18,11 +18,25 @@ const BarChart = ({ data }) => {
 
 		svg.attr('width', width).attr('height', height)
 
-		// 1. Parsowanie danych
-		const parsedData = data.map(d => ({
-			timestamp: new Date(d.timestamp),
-			stress_level: +d.stress_level,
-		}))
+		// 1. Parsowanie danych - obsługa różnych struktur
+		let parsedData = []
+		if (Array.isArray(data) && data.length > 0) {
+			// Jeśli to tablica segmentów
+			parsedData = data.map(d => ({
+				timestamp: new Date(d.timestamp || d.timestamp_start || d.time_seconds),
+				stress_level: +d.stress_level || 0,
+			}))
+		} else if (data && data.segments && Array.isArray(data.segments) && data.segments.length > 0) {
+			// Jeśli to obiekt z segments
+			parsedData = data.segments.map(d => ({
+				timestamp: new Date(d.timestamp || d.timestamp_start),
+				stress_level: +d.stress_level || 0,
+			}))
+		} else {
+			return // Nieprawidłowa struktura danych lub brak danych
+		}
+
+		if (parsedData.length === 0) return
 
 		// 2. Skala X (skala czasu)
 		const xScale = d3
@@ -76,8 +90,8 @@ const BarChart = ({ data }) => {
 			.append('path')
 			.datum(parsedData)
 			.attr('fill', 'none')
-			.attr('stroke', 'steelblue')
-			.attr('stroke-width', 2)
+			.attr('stroke', '#4A90E2')
+			.attr('stroke-width', 2.5)
 			.attr('d', lineGenerator)
 
 		// Rysowanie punktów na linii
@@ -89,8 +103,10 @@ const BarChart = ({ data }) => {
 			.attr('class', 'dot')
 			.attr('cx', d => xScale(d.timestamp))
 			.attr('cy', d => yScale(d.stress_level))
-			.attr('r', 3)
-			.attr('fill', 'steelblue')
+			.attr('r', 4)
+			.attr('fill', '#4A90E2')
+			.attr('stroke', '#ffffff')
+			.attr('stroke-width', 1.5)
 	}, [data])
 
 	return <svg ref={svgRef}></svg>

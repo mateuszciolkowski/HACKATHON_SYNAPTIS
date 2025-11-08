@@ -1,16 +1,14 @@
 import React from 'react'
-import { Box, Container, Typography, Grid } from '@mui/material'
+import { Box, Typography, Grid } from '@mui/material'
 import DashboardStats from '../DashboardStats/DashboardStats'
 import UserInfoCard from '../UserInfoCard/UserInfoCard'
 import QuickActionsCard from '../QuickActionsCard/QuickActionsCard'
+import StressTrendChart from '../StressTrendChart'
+import StressClassDistribution from '../StressClassDistribution'
+import StressAlerts from '../StressAlerts'
 
 function DashboardHome() {
-	// Ten komponent nie potrzebuje 'useTheme', 'useState' ani 'handleDrawerToggle'
-	// Otrzymuje je od swojego rodzica, 'Dashboard.jsx'
-
 	return (
-		// Zaczynamy od razu od treści.
-		// Nie ma tu <Box sx={{ display: 'flex' ...>>, <DashboardHeader>, <DashboardSidebar>
 		<>
 			<Box sx={{ mb: 4 }}>
 				<Typography variant='h4' component='h1' gutterBottom sx={{ fontWeight: 600 }}>
@@ -21,14 +19,33 @@ function DashboardHome() {
 				</Typography>
 			</Box>
 
+			{/* Statystyki */}
 			<DashboardStats />
 
-			<Grid container spacing={3}>
+			{/* Wykresy */}
+			<Grid container spacing={3} sx={{ mb: 3 }}>
 				<Grid item xs={12} md={8}>
-					<UserInfoCard />
+					<StressTrendChart />
 				</Grid>
 				<Grid item xs={12} md={4}>
-					<QuickActionsCard />
+					<StressClassDistribution />
+				</Grid>
+			</Grid>
+
+			{/* Alerty i informacje */}
+			<Grid container spacing={3} sx={{ mb: 3 }}>
+				<Grid item xs={12} md={8}>
+					<StressAlerts />
+				</Grid>
+				<Grid item xs={12} md={4}>
+					<Grid container spacing={3}>
+						<Grid item xs={12}>
+							<UserInfoCard />
+						</Grid>
+						<Grid item xs={12}>
+							<QuickActionsCard />
+						</Grid>
+					</Grid>
 				</Grid>
 			</Grid>
 		</>

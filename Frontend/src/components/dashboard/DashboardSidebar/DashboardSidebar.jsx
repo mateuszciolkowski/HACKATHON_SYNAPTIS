@@ -13,7 +13,7 @@ import {
 	Divider,
 } from '@mui/material'
 // Importuj ikony, których potrzebujesz
-import { Dashboard as DashboardIcon, People, CalendarToday } from '@mui/icons-material'
+import { Dashboard as DashboardIcon, People, CalendarToday, PersonAdd as PersonAddIcon } from '@mui/icons-material'
 
 const drawerWidth = 240
 
@@ -31,6 +31,11 @@ function DashboardSidebar({ mobileOpen, onMobileClose, currentView, onViewChange
 			text: 'Pacjenci',
 			icon: <People />,
 			view: 'patients',
+		},
+		{
+			text: 'Dodaj pacjenta',
+			icon: <PersonAddIcon />,
+			view: 'add-patient',
 		},
 		{
 			text: 'Kalendarz',
@@ -91,7 +96,11 @@ function DashboardSidebar({ mobileOpen, onMobileClose, currentView, onViewChange
 				variant='permanent'
 				sx={{
 					display: { xs: 'none', md: 'block' },
-					'& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+					'& .MuiDrawer-paper': {
+						boxSizing: 'border-box',
+						width: drawerWidth,
+						zIndex: 1200,
+					},
 				}}
 				open>
 				{drawer}
