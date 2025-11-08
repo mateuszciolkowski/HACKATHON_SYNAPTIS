@@ -1,4 +1,3 @@
-// src/components/dashboard/Patients/PatientDetailView.jsx
 import React, { useState, useEffect } from 'react'
 import {
 	Box,
@@ -8,41 +7,33 @@ import {
 	IconButton,
 	Divider,
 	Grid,
-	Select, // --- Import Select ---
-	MenuItem, // --- Import MenuItem ---
-	FormControl, // --- Import FormControl ---
-	InputLabel, // --- Import InputLabel ---
+	Select,
+	MenuItem,
+	FormControl,
+	InputLabel,
 } from '@mui/material'
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material'
 import { axiosInstance } from '../../../context/AuthContext'
 import BarChart from './BarChart'
 
+const DROPDOWN_MAX_HEIGHT = 250
+
 const PatientDetailView = ({ patientId, onBack }) => {
 	const [patientData, setPatientData] = useState(null)
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState(null)
-
-	// --- NOWY STAN ---
-	// Przechowuje ID aktualnie *wybranej* wizyty z listy. '' oznacza 'żadna'.
 	const [selectedVisitId, setSelectedVisitId] = useState('')
-	// ---------------
 
 	useEffect(() => {
 		setLoading(true)
 		setError(null)
 		setPatientData(null)
-		setSelectedVisitId('') // Resetuj wybór wizyty przy zmianie pacjenta
+		setSelectedVisitId('')
 
 		const fetchPatientData = async () => {
 			try {
 				const response = await axiosInstance.get(`/api/patients/${patientId}/full/`)
 				setPatientData(response.data)
-
-				// Opcjonalnie: automatycznie wybierz pierwszą wizytę, jeśli istnieje
-				// if (response.data?.visits?.length > 0) {
-				// 	setSelectedVisitId(response.data.visits[0].id)
-				// }
-
 			} catch (err) {
 				console.error('Failed to fetch patient details:', err)
 				setError('Nie udało się pobrać szczegółowych danych pacjenta.')
@@ -56,23 +47,16 @@ const PatientDetailView = ({ patientId, onBack }) => {
 		}
 	}, [patientId])
 
-	// --- NOWA FUNKCJA ---
-	// Obsługuje zmianę w liście rozwijanej
 	const handleVisitChange = event => {
 		setSelectedVisitId(event.target.value)
 	}
-	// --------------------
-	
-	// --- ZNAJDŹ WYBRANĄ WIZYTĘ ---
-	// Znajdź pełny obiekt wybranej wizyty na podstawie jej ID
+
 	const selectedVisit =
 		patientData?.visits.find(visit => visit.id === selectedVisitId) || null
-	// ---------------------------
 
 	return (
-		// --- ZMIANA: Dodano minHeight, aby rozciągnąć widok ---
 		<Paper sx={{ p: 4, width: '100%', minHeight: '85vh' }}>
-			{/* Nagłówek z przyciskiem powrotu */}
+			{/* Nagłówek (bez zmian) */}
 			<Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
 				<IconButton onClick={onBack} aria-label='Wróć do listy'>
 					<ArrowBackIcon />
@@ -93,6 +77,7 @@ const PatientDetailView = ({ patientId, onBack }) => {
 							<Typography variant='h6' gutterBottom>
 								Dane Osobowe
 							</Typography>
+							{/* ... (dane pacjenta bez zmian) ... */}
 							<Typography>
 								<strong>Imię:</strong> {patientData.first_name}
 							</Typography>
@@ -114,15 +99,14 @@ const PatientDetailView = ({ patientId, onBack }) => {
 						</Box>
 					</Grid>
 
-					{/* Prawa kolumna: Historia wizyt (PRZEBUDOWANA) */}
+					{/* Prawa kolumna: Historia wizyt */}
 					<Grid item xs={12} md={7}>
 						<Typography variant='h6' gutterBottom>
 							Historia Wizyt
 						</Typography>
-						
+
 						{patientData.visits && patientData.visits.length > 0 ? (
 							<Box>
-								{/* --- NOWA LISTA ROZWIJANA (SELECT) --- */}
 								<FormControl fullWidth sx={{ mb: 3 }}>
 									<InputLabel id='visit-select-label'>Wybierz datę wizyty</InputLabel>
 									<Select
@@ -131,13 +115,30 @@ const PatientDetailView = ({ patientId, onBack }) => {
 										value={selectedVisitId}
 										label='Wybierz datę wizyty'
 										onChange={handleVisitChange}
+										
+										MenuProps={{
+											anchorOrigin: {
+												vertical: 'bottom',
+												horizontal: 'left',
+											},
+											transformOrigin: {
+												vertical: 'top',
+												horizontal: 'left',
+											},
+											getContentAnchorEl: null,
+											
+											PaperProps: {
+												style: {
+													maxHeight: DROPDOWN_MAX_HEIGHT,
+												},
+											},
+										}}
+										// ---------------------------------
 									>
-										{/* Pusta opcja "Wybierz" */}
 										<MenuItem value=''>
 											<em>Wybierz...</em>
 										</MenuItem>
-										
-										{/* Mapowanie wizyt do opcji w liście */}
+
 										{patientData.visits.map(visit => (
 											<MenuItem key={visit.id} value={visit.id}>
 												{new Date(visit.visit_date).toLocaleString('pl-PL')}
@@ -146,8 +147,7 @@ const PatientDetailView = ({ patientId, onBack }) => {
 									</Select>
 								</FormControl>
 
-								{/* --- KONTENER NA SZCZEGÓŁY WYBRANEJ WIZYTY --- */}
-								{/* Wyświetlany tylko jeśli jakaś wizyta jest wybrana */}
+								{/* Kontener na szczegóły wybranej wizyty (bez zmian) */}
 								{selectedVisit && (
 									<Paper variant='outlined' sx={{ p: 2 }}>
 										<Typography>
