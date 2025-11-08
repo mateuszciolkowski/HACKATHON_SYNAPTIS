@@ -10,3 +10,4 @@ pandas>=2.0.0
 scipy>=1.10.0
 faker==23.3.0
 openai>=1.0.0
+django-cors-headers>=4.0.0
