@@ -1,4 +1,3 @@
-// src/components/dashboard/Patients/PatientDetailView.jsx
 import React, { useState, useEffect } from 'react'
 import {
 	Box,
@@ -7,29 +6,32 @@ import {
 	Paper,
 	IconButton,
 	Divider,
-	Grid, // Import Grid
+	Grid,
+	Select,
+	MenuItem,
+	FormControl,
+	InputLabel,
 } from '@mui/material'
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material'
 import { axiosInstance } from '../../../context/AuthContext'
-import BarChart from './BarChart' // Import nowego komponentu wykresu
+import BarChart from './BarChart'
 
-// Dane, które podałeś, użyjemy ich do wykresu
-const data = [10, 20, 30, 40, 50, 60, 70]
+const DROPDOWN_MAX_HEIGHT = 250
 
 const PatientDetailView = ({ patientId, onBack }) => {
 	const [patientData, setPatientData] = useState(null)
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState(null)
+	const [selectedVisitId, setSelectedVisitId] = useState('')
 
 	useEffect(() => {
-		// Resetuj stan przy zmianie ID
 		setLoading(true)
 		setError(null)
 		setPatientData(null)
+		setSelectedVisitId('')
 
 		const fetchPatientData = async () => {
 			try {
-				// Użyj żądania GET /api/patients/{id}/full/
 				const response = await axiosInstance.get(`/api/patients/${patientId}/full/`)
 				setPatientData(response.data)
 			} catch (err) {
@@ -43,11 +45,18 @@ const PatientDetailView = ({ patientId, onBack }) => {
 		if (patientId) {
 			fetchPatientData()
 		}
-	}, [patientId]) // Efekt uruchamia się ponownie, gdy zmieni się patientId
+	}, [patientId])
+
+	const handleVisitChange = event => {
+		setSelectedVisitId(event.target.value)
+	}
+
+	const selectedVisit =
+		patientData?.visits.find(visit => visit.id === selectedVisitId) || null
 
 	return (
-		<Paper sx={{ p: 4, width: '100%' }}>
-			{/* Przycisk powrotu i tytuł pozostają na górze */}
+		<Paper sx={{ p: 4, width: '100%', minHeight: '85vh' }}>
+			{/* Nagłówek (bez zmian) */}
 			<Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
 				<IconButton onClick={onBack} aria-label='Wróć do listy'>
 					<ArrowBackIcon />
@@ -58,16 +67,17 @@ const PatientDetailView = ({ patientId, onBack }) => {
 			</Box>
 
 			{loading && <CircularProgress />}
-
 			{error && <Typography color='error'>{error}</Typography>}
 
-			{/* Używamy Grid do podziału na dwie kolumny */}
 			{patientData && (
 				<Grid container spacing={3}>
-					{/* Lewa kolumna: Dane pacjenta */}
-					<Grid item xs={12} md={7}>
+					{/* Lewa kolumna: Dane osobowe (bez zmian) */}
+					<Grid item xs={12} md={5}>
 						<Box>
-							<Typography variant='h6'>Dane Osobowe</Typography>
+							<Typography variant='h6' gutterBottom>
+								Dane Osobowe
+							</Typography>
+							{/* ... (dane pacjenta bez zmian) ... */}
 							<Typography>
 								<strong>Imię:</strong> {patientData.first_name}
 							</Typography>
@@ -86,46 +96,87 @@ const PatientDetailView = ({ patientId, onBack }) => {
 							<Typography>
 								<strong>Notatki:</strong> {patientData.notes || 'Brak'}
 							</Typography>
-
-							<Divider sx={{ my: 2 }} />
-
-							<Typography variant='h6'>Historia Wizyt</Typography>
-							{patientData.visits && patientData.visits.length > 0 ? (
-								patientData.visits.map(visit => (
-									<Box
-										key={visit.id}
-										sx={{ mb: 2, p: 2, border: '1px solid #ddd', borderRadius: '4px' }}>
-										<Typography>
-											<strong>Data wizyty:</strong>{' '}
-											{new Date(visit.visit_date).toLocaleString('pl-PL')}
-										</Typography>
-										<Typography>
-											<strong>Notatki psychologa:</strong> {visit.psychologist_notes || 'Brak'}
-										</Typography>
-										<Typography>
-											<strong>Podsumowanie AI:</strong> {visit.ai_summary || 'Brak'}
-										</Typography>
-										<Typography>
-											<strong>Historia stresu:</strong> {visit.stress_history || 'Brak'}
-										</Typography>
-									</Box>
-								))
-							) : (
-								<Typography>Brak zarejestrowanych wizyt.</Typography>
-							)}
 						</Box>
 					</Grid>
 
-					{/* Prawa kolumna: Wykres D3 */}
-					<Grid item xs={12} md={5}>
-						<Box>
-							<Typography variant='h6'>Poziom Stresu (Wykres)</Typography>
-							<Typography variant='body2' color='text.secondary' gutterBottom>
-								Przykładowy wykres D3.js
-							</Typography>
-							{/* Tutaj renderujemy nasz komponent wykresu */}
-							<BarChart data={data} />
-						</Box>
+					{/* Prawa kolumna: Historia wizyt */}
+					<Grid item xs={12} md={7}>
+						<Typography variant='h6' gutterBottom>
+							Historia Wizyt
+						</Typography>
+
+						{patientData.visits && patientData.visits.length > 0 ? (
+							<Box>
+								<FormControl fullWidth sx={{ mb: 3 }}>
+									<InputLabel id='visit-select-label'>Wybierz datę wizyty</InputLabel>
+									<Select
+										labelId='visit-select-label'
+										id='visit-select'
+										value={selectedVisitId}
+										label='Wybierz datę wizyty'
+										onChange={handleVisitChange}
+										
+										MenuProps={{
+											anchorOrigin: {
+												vertical: 'bottom',
+												horizontal: 'left',
+											},
+											transformOrigin: {
+												vertical: 'top',
+												horizontal: 'left',
+											},
+											getContentAnchorEl: null,
+											
+											PaperProps: {
+												style: {
+													maxHeight: DROPDOWN_MAX_HEIGHT,
+												},
+											},
+										}}
+										// ---------------------------------
+									>
+										<MenuItem value=''>
+											<em>Wybierz...</em>
+										</MenuItem>
+
+										{patientData.visits.map(visit => (
+											<MenuItem key={visit.id} value={visit.id}>
+												{new Date(visit.visit_date).toLocaleString('pl-PL')}
+											</MenuItem>
+										))}
+									</Select>
+								</FormControl>
+
+								{/* Kontener na szczegóły wybranej wizyty (bez zmian) */}
+								{selectedVisit && (
+									<Paper variant='outlined' sx={{ p: 2 }}>
+										<Typography>
+											<strong>Notatki psychologa:</strong>{' '}
+											{selectedVisit.psychologist_notes || 'Brak'}
+										</Typography>
+										<Typography sx={{ mt: 1 }}>
+											<strong>Podsumowanie AI:</strong> {selectedVisit.ai_summary || 'Brak'}
+										</Typography>
+
+										<Divider sx={{ my: 2 }} />
+
+										<Box>
+											<Typography variant='subtitle1' fontWeight={600}>
+												Historia stresu dla wybranej wizyty:
+											</Typography>
+											{selectedVisit.stress_history &&
+											selectedVisit.stress_history.length > 0 ? (
+												<BarChart data={selectedVisit.stress_history} />
+											) : (
+												<Typography>Brak historii stresu dla tej wizyty.</Typography>
+											)}
+										</Box>
+									</Paper>
+								)}
+							</Box>
+						) : (
+							<Typography>Brak zarejestrowanych wizyt.</Typography>
+						)}
 					</Grid>
 				</Grid>
 			)}
