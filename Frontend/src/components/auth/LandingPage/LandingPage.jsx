@@ -26,6 +26,7 @@ import Modal from '../../common/Modal'
 import LoginForm from '../LoginForm'
 import RegistrationForm from '../RegistrationForm'
 import backgroundImage from '../../../logo/obrazjpg.jpg'
+import logoImage from '../../../logo/logo.png'
 
 function LandingPage() {
 	const [modalOpen, setModalOpen] = useState(null)
@@ -117,20 +118,35 @@ function LandingPage() {
 							justifyContent: 'space-between',
 						}}
 					>
-						<Typography
-							variant="h6"
-							component="div"
+						<Box
 							sx={{
-								fontWeight: 700,
-								fontSize: '1.25rem',
-								background: 'linear-gradient(135deg, #4A90E2 0%, #5B9BD5 100%)',
-								backgroundClip: 'text',
-								WebkitBackgroundClip: 'text',
-								WebkitTextFillColor: 'transparent',
+								display: 'flex',
+								alignItems: 'center',
+								gap: 1.5,
 							}}
 						>
-							Logo
-						</Typography>
+							<Box
+								component="img"
+								src={logoImage}
+								alt="Logo"
+								sx={{
+									height: { xs: 32, sm: 40 },
+									width: 'auto',
+									objectFit: 'contain',
+								}}
+							/>
+							<Typography
+								variant="h6"
+								sx={{
+									fontWeight: 700,
+									color: '#4A90E2',
+									fontSize: { xs: '1.25rem', sm: '1.5rem' },
+									display: { xs: 'none', sm: 'block' },
+								}}
+							>
+								Synaptis
+							</Typography>
+						</Box>
 						<Stack direction="row" spacing={1.5}>
 							<Button
 								variant="outlined"
@@ -184,46 +200,93 @@ function LandingPage() {
 					sx={{
 						flex: 1,
 						display: 'flex',
-						alignItems: 'center',
+						alignItems: 'flex-start',
 						justifyContent: 'center',
 						position: 'relative',
 						zIndex: 2,
-						py: { xs: 6, md: 10 },
+						py: { xs: 2, md: 4 },
+						pt: { xs: 4, md: 6 },
 					}}
 				>
 					<Container maxWidth="md" sx={{ position: 'relative', zIndex: 2 }}>
-					<Typography
-						variant="h2"
-						component="h1"
-						align="center"
+				{/* Logo Container with Clouds Background */}
+				<Box
+					sx={{
+						display: 'flex',
+						justifyContent: 'center',
+						mt: 0,
+						position: 'relative',
+					}}
+				>
+					<Box
 						sx={{
-							fontWeight: 700,
-							mb: 3,
-							background: 'linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.9) 100%)',
-							backgroundClip: 'text',
-							WebkitBackgroundClip: 'text',
-							WebkitTextFillColor: 'transparent',
-							fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4rem' },
+							position: 'relative',
+							display: 'flex',
+							flexDirection: 'column',
+							alignItems: 'center',
+							justifyContent: 'center',
+							padding: { xs: 4, sm: 5, md: 6 },
+							borderRadius: 4,
+							backgroundColor: 'transparent',
+							minWidth: { xs: '450px', sm: '600px', md: '700px' },
 						}}
 					>
-						Monitorowanie Stresu
-					</Typography>
-					<Typography
-						variant="h5"
-						align="center"
-						sx={{
-							color: 'rgba(255, 255, 255, 0.95)',
-							fontSize: { xs: '1.125rem', sm: '1.25rem' },
-							fontWeight: 400,
-							maxWidth: '700px',
-							mx: 'auto',
-							mb: 4,
-							lineHeight: 1.6,
-						}}
-					>
-					Zaawansowana platforma do analizy i monitorowania poziomu stresu na podstawie sygnałów biometrycznych. 
-					Wykorzystaj sztuczną inteligencję do lepszego zrozumienia swojego zdrowia.
-				</Typography>
+						{/* Logo */}
+						<Box
+							component="img"
+							src={logoImage}
+							alt="Logo"
+							sx={{
+								height: { xs: 120, sm: 160, md: 200 },
+								width: 'auto',
+								objectFit: 'contain',
+								filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))',
+								opacity: 0.95,
+								position: 'relative',
+								zIndex: 1,
+								mb: { xs: 3, sm: 4, md: 5 },
+							}}
+						/>
+						{/* Text below Logo */}
+						<Box
+							sx={{
+								textAlign: 'center',
+								display: 'flex',
+								flexDirection: 'column',
+								alignItems: 'center',
+								width: '100%',
+								px: 2,
+							}}
+						>
+							<Typography
+								component="div"
+								sx={{
+									fontWeight: 700,
+									color: '#ffffff',
+									textShadow: '0 2px 8px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.3)',
+									fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4.5rem' },
+									mb: { xs: 2, sm: 2.5 },
+									lineHeight: 1.2,
+								}}
+							>
+								Synaptis
+							</Typography>
+							<Typography
+								component="div"
+								sx={{
+									fontWeight: 400,
+									color: '#ffffff',
+									textShadow: '0 2px 8px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.3)',
+									fontSize: { xs: '1.125rem', sm: '1.375rem', md: '1.5rem' },
+									lineHeight: 1.6,
+									maxWidth: { xs: '90%', sm: '85%', md: '800px' },
+								}}
+							>
+								Zaawansowana platforma do analizy i monitorowania poziomu stresu na podstawie sygnałów biometrycznych. Wykorzystaj sztuczną inteligencję do lepszego zrozumienia swojego zdrowia.
+							</Typography>
+						</Box>
+					</Box>
+				</Box>
 				</Container>
 				</Box>
 			</Box>
@@ -474,7 +537,7 @@ function LandingPage() {
 									fontSize: '1.125rem',
 								}}
 							>
-								Monitorowanie Stresu
+								Synaptis
 							</Typography>
 							<Typography
 								variant="body2"
@@ -543,7 +606,7 @@ function LandingPage() {
 						align="center"
 						sx={{ color: 'rgba(0, 0, 0, 0.5)', fontSize: '0.875rem' }}
 					>
-						© 2025 Monitorowanie Stresu. Wszelkie prawa zastrzeżone.
+						© 2025 Synaptis. Wszelkie prawa zastrzeżone.
 					</Typography>
 				</Container>
 			</Box>
