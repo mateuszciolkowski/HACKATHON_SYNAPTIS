@@ -79,7 +79,10 @@ function RegistrationForm({ onSuccess, onSwitchToLogin }) {
 					'& .MuiOutlinedInput-root': {
 						borderRadius: 2,
 						'&:hover fieldset': {
-							borderColor: 'primary.main',
+							borderColor: '#4A90E2',
+						},
+						'&.Mui-focused fieldset': {
+							borderColor: '#4A90E2',
 						},
 					},
 				}}
@@ -108,7 +111,10 @@ function RegistrationForm({ onSuccess, onSwitchToLogin }) {
 							'& .MuiOutlinedInput-root': {
 								borderRadius: 2,
 								'&:hover fieldset': {
-									borderColor: 'primary.main',
+									borderColor: '#4A90E2',
+								},
+								'&.Mui-focused fieldset': {
+									borderColor: '#4A90E2',
 								},
 							},
 						}}
@@ -136,7 +142,10 @@ function RegistrationForm({ onSuccess, onSwitchToLogin }) {
 							'& .MuiOutlinedInput-root': {
 								borderRadius: 2,
 								'&:hover fieldset': {
-									borderColor: 'primary.main',
+									borderColor: '#4A90E2',
+								},
+								'&.Mui-focused fieldset': {
+									borderColor: '#4A90E2',
 								},
 							},
 						}}
@@ -165,7 +174,10 @@ function RegistrationForm({ onSuccess, onSwitchToLogin }) {
 					'& .MuiOutlinedInput-root': {
 						borderRadius: 2,
 						'&:hover fieldset': {
-							borderColor: 'primary.main',
+							borderColor: '#4A90E2',
+						},
+						'&.Mui-focused fieldset': {
+							borderColor: '#4A90E2',
 						},
 					},
 				}}
@@ -192,7 +204,10 @@ function RegistrationForm({ onSuccess, onSwitchToLogin }) {
 					'& .MuiOutlinedInput-root': {
 						borderRadius: 2,
 						'&:hover fieldset': {
-							borderColor: 'primary.main',
+							borderColor: '#4A90E2',
+						},
+						'&.Mui-focused fieldset': {
+							borderColor: '#4A90E2',
 						},
 					},
 				}}
@@ -211,9 +226,11 @@ function RegistrationForm({ onSuccess, onSwitchToLogin }) {
 					textTransform: 'none',
 					fontSize: '0.9375rem',
 					fontWeight: 600,
-					boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)',
+					backgroundColor: '#4A90E2',
+					boxShadow: '0 4px 12px rgba(74, 144, 226, 0.4)',
 					'&:hover': {
-						boxShadow: '0 6px 16px rgba(102, 126, 234, 0.5)',
+						backgroundColor: '#3A7BC8',
+						boxShadow: '0 6px 16px rgba(74, 144, 226, 0.5)',
 					},
 				}}
 			>
@@ -229,13 +246,14 @@ function RegistrationForm({ onSuccess, onSwitchToLogin }) {
 							type="button"
 							onClick={onSwitchToLogin}
 							sx={{
-								color: 'primary.main',
+								color: '#4A90E2',
 								fontWeight: 600,
 								textDecoration: 'none',
 								cursor: 'pointer',
 								fontSize: '0.875rem',
 								'&:hover': {
 									textDecoration: 'underline',
+									color: '#3A7BC8',
 								},
 							}}
 						>
