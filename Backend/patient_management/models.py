@@ -8,6 +8,11 @@ class Patient(models.Model):
     gender = models.CharField(max_length=10)
     pesel = models.CharField(max_length=11, unique=True)
     notes = models.TextField(blank=True, null=True)
+    long_term_summary = models.TextField(
+        blank=True, 
+        null=True,
+        help_text="Długoterminowa analiza AI dotycząca postępów pacjenta w terapii."
+    )
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
@@ -43,7 +48,7 @@ class Session(models.Model):
     
     # Analiza AI
     ai_summary_story = models.TextField(blank=True, null=True, help_text="Historia wygenerowana przez model AI podsumowująca sesję")
-    
+
     class Meta:
         verbose_name = 'Session'
         verbose_name_plural = 'Sessions'
