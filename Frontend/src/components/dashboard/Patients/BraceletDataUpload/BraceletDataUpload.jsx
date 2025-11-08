@@ -33,48 +33,123 @@ function BraceletDataUpload({ visitId, onUpload }) {
 
 		setError(null)
 
-		// Mock parsing - na razie symulujemy parsowanie
 		try {
-			// Symuluj parsowanie pliku
-			await new Promise(resolve => setTimeout(resolve, 500))
+			// Sprawdź typ pliku
+			const isJson = file.name.endsWith('.json')
+			const isPkl = file.name.endsWith('.pkl')
 
-			// Mock dane - w rzeczywistości tutaj byłoby parsowanie pliku .pkl lub JSON
-			const mockData = {
-				acc: {
-					samples: 9600, // 32 Hz * 300 sekund
-					rate: 32,
-					shape: [9600, 3],
-					description: 'Akcelerometr (3 osie: x, y, z)'
-				},
-				bvp: {
-					samples: 19200, // 64 Hz * 300 sekund
-					rate: 64,
-					shape: [19200, 1],
-					description: 'Blood Volume Pulse'
-				},
-				eda: {
-					samples: 1200, // 4 Hz * 300 sekund
-					rate: 4,
-					shape: [1200, 1],
-					description: 'Electrodermal Activity'
-				},
-				temp: {
-					samples: 1200, // 4 Hz * 300 sekund
-					rate: 4,
-					shape: [1200, 1],
-					description: 'Temperatura'
-				},
-				duration: 300, // sekundy
-				fileSize: file.size,
-				fileName: file.name,
+			if (!isJson && !isPkl) {
+				setError('Nieobsługiwany format pliku. Obsługiwane formaty: .json, .pkl')
+				return
+			}
+
+			let parsedData = null
+
+			if (isJson) {
+				// Parsuj plik JSON
+				const text = await file.text()
+				const jsonData = JSON.parse(text)
+
+				// Wyciągnij dane z struktury JSON
+				const signal = jsonData.signal?.wrist || jsonData.signal || {}
+				const metadata = jsonData.metadata || {}
+				const duration = metadata.duration_seconds || 300
+
+				// Oblicz liczbę próbek na podstawie rzeczywistych danych lub metadanych
+				const accData = signal.ACC || []
+				const bvpData = signal.BVP || []
+				const edaData = signal.EDA || []
+				const tempData = signal.TEMP || []
+
+				// Jeśli dane są pełne, użyj rzeczywistej liczby próbek
+				// W przeciwnym razie użyj częstotliwości próbkowania z metadanych
+				const accRate = metadata.sampling_rates?.ACC || 32
+				const bvpRate = metadata.sampling_rates?.BVP || 64
+				const edaRate = metadata.sampling_rates?.EDA || 4
+				const tempRate = metadata.sampling_rates?.TEMP || 4
+
+				const accSamples = accData.length > 0 ? accData.length : accRate * duration
+				const bvpSamples = bvpData.length > 0 ? bvpData.length : bvpRate * duration
+				const edaSamples = edaData.length > 0 ? edaData.length : edaRate * duration
+				const tempSamples = tempData.length > 0 ? tempData.length : tempRate * duration
+
+				parsedData = {
+					acc: {
+						samples: accSamples,
+						rate: accRate,
+						shape: [accSamples, Array.isArray(accData[0]) ? accData[0].length : 3],
+						description: 'Akcelerometr (3 osie: x, y, z)',
+						data: accData.length > 0 ? accData : null,
+					},
+					bvp: {
+						samples: bvpSamples,
+						rate: bvpRate,
+						shape: [bvpSamples, 1],
+						description: 'Blood Volume Pulse',
+						data: bvpData.length > 0 ? bvpData : null,
+					},
+					eda: {
+						samples: edaSamples,
+						rate: edaRate,
+						shape: [edaSamples, 1],
+						description: 'Electrodermal Activity',
+						data: edaData.length > 0 ? edaData : null,
+					},
+					temp: {
+						samples: tempSamples,
+						rate: tempRate,
+						shape: [tempSamples, 1],
+						description: 'Temperatura',
+						data: tempData.length > 0 ? tempData : null,
+					},
+					duration: duration,
+					fileSize: file.size,
+					fileName: file.name,
+					metadata: metadata,
+					note: jsonData.note || null,
+				}
+			} else if (isPkl) {
+				// Dla plików .pkl na razie używamy mock danych
+				// W przyszłości tutaj będzie prawdziwe parsowanie pliku .pkl
+				await new Promise(resolve => setTimeout(resolve, 500))
+
+				parsedData = {
+					acc: {
+						samples: 9600, // 32 Hz * 300 sekund
+						rate: 32,
+						shape: [9600, 3],
+						description: 'Akcelerometr (3 osie: x, y, z)'
+					},
+					bvp: {
+						samples: 19200, // 64 Hz * 300 sekund
+						rate: 64,
+						shape: [19200, 1],
+						description: 'Blood Volume Pulse'
+					},
+					eda: {
+						samples: 1200, // 4 Hz * 300 sekund
+						rate: 4,
+						shape: [1200, 1],
+						description: 'Electrodermal Activity'
+					},
+					temp: {
+						samples: 1200, // 4 Hz * 300 sekund
+						rate: 4,
+						shape: [1200, 1],
+						description: 'Temperatura'
+					},
+					duration: 300, // sekundy
+					fileSize: file.size,
+					fileName: file.name,
+				}
 			}
 
 			setDataFile(file)
-			setParsedData(mockData)
+			setParsedData(parsedData)
 
 			// Mock upload - w przyszłości tutaj będzie prawdziwy upload
 			if (onUpload) {
-				onUpload(mockData, visitId)
+				onUpload(parsedData, visitId)
 			}
 		} catch (err) {
 			setError('Błąd podczas parsowania pliku. Upewnij się, że plik ma poprawny format.')
@@ -118,6 +193,23 @@ function BraceletDataUpload({ visitId, onUpload }) {
 						</IconButton>
 					</Box>
 
+					{parsedData.note && (
+						<Alert severity="info" sx={{ mb: 2, borderRadius: 2 }}>
+							{parsedData.note}
+						</Alert>
+					)}
+					{parsedData.metadata && (
+						<Box sx={{ mb: 2, p: 1.5, backgroundColor: 'rgba(74, 144, 226, 0.05)', borderRadius: 1 }}>
+							<Typography variant='caption' color='text.secondary' sx={{ display: 'block', mb: 0.5 }}>
+								<strong>Urządzenie:</strong> {parsedData.metadata.device || 'Nieznane'}
+							</Typography>
+							{parsedData.metadata.recording_date && (
+								<Typography variant='caption' color='text.secondary' sx={{ display: 'block' }}>
+									<strong>Data nagrania:</strong> {new Date(parsedData.metadata.recording_date).toLocaleString('pl-PL')}
+								</Typography>
+							)}
+						</Box>
+					)}
 					<Paper
 						variant='outlined'
 						sx={{

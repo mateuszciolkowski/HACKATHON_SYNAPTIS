@@ -74,18 +74,40 @@ const BarChart = ({ data }) => {
 			.attr('y', 6)
 			.attr('dy', '-3.5em')
 			.attr('text-anchor', 'end')
-			.attr('fill', '#000')
+			.style('font-size', '12px')
+			.style('font-weight', '500')
+			.attr('fill', '#666')
 			.text('Poziom stresu')
 
-		// 6. Definicja generatora linii
+		// 6. Oblicz linię trendu (regresja liniowa)
+		const n = parsedData.length
+		const sumX = parsedData.reduce((sum, d, i) => sum + i, 0)
+		const sumY = parsedData.reduce((sum, d) => sum + d.stress_level, 0)
+		const sumXY = parsedData.reduce((sum, d, i) => sum + i * d.stress_level, 0)
+		const sumX2 = parsedData.reduce((sum, d, i) => sum + i * i, 0)
+		
+		const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX)
+		const intercept = (sumY - slope * sumX) / n
+		
+		const trendLine = parsedData.map((d, i) => ({
+			timestamp: d.timestamp,
+			stress_level: Math.max(0, Math.min(10, intercept + slope * i)),
+		}))
+
+		// 7. Definicja generatora linii danych
 		const lineGenerator = d3
 			.line()
 			.x(d => xScale(d.timestamp))
 			.y(d => yScale(d.stress_level))
-			// ========= ZMIANA TUTAJ: Usunięto wygładzanie =========
-			.curve(d3.curveLinear) // Zmieniono z curveMonotoneX na curveLinear
+			.curve(d3.curveLinear)
 
-		// Rysowanie linii
+		// Linia trendu
+		const trendLineGenerator = d3
+			.line()
+			.x(d => xScale(d.timestamp))
+			.y(d => yScale(d.stress_level))
+
+		// Rysowanie linii danych
 		svg
 			.append('path')
 			.datum(parsedData)
@@ -93,6 +115,17 @@ const BarChart = ({ data }) => {
 			.attr('stroke', '#4A90E2')
 			.attr('stroke-width', 2.5)
 			.attr('d', lineGenerator)
+
+		// Rysowanie linii trendu (przerywanej)
+		svg
+			.append('path')
+			.datum(trendLine)
+			.attr('fill', 'none')
+			.attr('stroke', '#E24A4A')
+			.attr('stroke-width', 2)
+			.attr('stroke-dasharray', '5,5')
+			.attr('opacity', 0.8)
+			.attr('d', trendLineGenerator)
 
 		// Rysowanie punktów na linii
 		svg
@@ -107,6 +140,49 @@ const BarChart = ({ data }) => {
 			.attr('fill', '#4A90E2')
 			.attr('stroke', '#ffffff')
 			.attr('stroke-width', 1.5)
+
+		// Legenda
+		const legend = svg
+			.append('g')
+			.attr('transform', `translate(${width - 120}, 20)`)
+
+		// Legenda dla linii danych
+		const legendData = legend.append('g').attr('transform', 'translate(0, 0)')
+		legendData
+			.append('line')
+			.attr('x1', 0)
+			.attr('x2', 20)
+			.attr('y1', 0)
+			.attr('y2', 0)
+			.attr('stroke', '#4A90E2')
+			.attr('stroke-width', 2.5)
+		legendData
+			.append('text')
+			.attr('x', 25)
+			.attr('y', 4)
+			.style('font-size', '11px')
+			.style('fill', '#666')
+			.text('Poziom stresu')
+
+		// Legenda dla linii trendu
+		const legendTrend = legend.append('g').attr('transform', 'translate(0, 18)')
+		legendTrend
+			.append('line')
+			.attr('x1', 0)
+			.attr('x2', 20)
+			.attr('y1', 0)
+			.attr('y2', 0)
+			.attr('stroke', '#E24A4A')
+			.attr('stroke-width', 2)
+			.attr('stroke-dasharray', '5,5')
+			.attr('opacity', 0.8)
+		legendTrend
+			.append('text')
+			.attr('x', 25)
+			.attr('y', 4)
+			.style('font-size', '11px')
+			.style('fill', '#666')
+			.text('Trend')
 	}, [data])
 
 	return <svg ref={svgRef}></svg>

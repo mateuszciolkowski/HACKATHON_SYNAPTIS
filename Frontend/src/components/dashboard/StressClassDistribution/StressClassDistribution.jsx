@@ -1,36 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Card, CardHeader, CardContent, Box, CircularProgress, Typography } from '@mui/material'
 import * as d3 from 'd3'
-import axios from 'axios'
-
-// Configure axios instance
-const axiosInstance = axios.create({
-	baseURL: import.meta.env.DEV ? '' : '',
-	headers: {
-		'Content-Type': 'application/json',
-	},
-})
-
-// Add request interceptor to include auth token
-axiosInstance.interceptors.request.use(
-	config => {
-		const tokens = localStorage.getItem('authTokens')
-		if (tokens) {
-			try {
-				const parsedTokens = JSON.parse(tokens)
-				if (parsedTokens?.access) {
-					config.headers.Authorization = `Bearer ${parsedTokens.access}`
-				}
-			} catch (error) {
-				console.error('Error parsing tokens:', error)
-			}
-		}
-		return config
-	},
-	error => {
-		return Promise.reject(error)
-	}
-)
 
 const COLORS = {
 	Baseline: '#4A90E2',
@@ -52,52 +22,32 @@ function StressClassDistribution() {
 	const [loading, setLoading] = useState(true)
 
 	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				setLoading(true)
-				
-				// Pobierz wizyty
-				const visitsResponse = await axiosInstance.get('/api/visits/')
-				const visits = visitsResponse.data.results || visitsResponse.data || []
-
-				// Zlicz klasy stresu ze wszystkich wizyt
-				const classCounts = {
-					Baseline: 0,
-					Stress: 0,
-					Amusement: 0,
-					Meditation: 0,
-				}
-
-				visits.forEach(visit => {
-					if (visit.stress_history && visit.stress_history.statistics) {
-						const classDistribution = visit.stress_history.statistics.class_distribution || []
-						
-						classDistribution.forEach(item => {
-							if (classCounts.hasOwnProperty(item.class_name)) {
-								classCounts[item.class_name] += item.count || 0
-							}
-						})
-					}
-				})
-
-				// Konwertuj na format dla wykresu
-				const chartDataArray = Object.entries(classCounts)
-					.map(([className, count]) => ({
-						name: POLISH_NAMES[className] || className,
-						value: count,
-						originalName: className,
-					}))
-					.filter(item => item.value > 0) // Tylko klasy z danymi
-
-				setChartData(chartDataArray)
-			} catch (error) {
-				console.error('Error fetching distribution data:', error)
-			} finally {
-				setLoading(false)
+		const generateMockData = () => {
+			setLoading(true)
+			
+			// Generuj mock rozkład klas stresu
+			// Realistyczny rozkład: więcej Baseline, umiarkowanie Stress, mniej Amusement i Meditation
+			const classCounts = {
+				Baseline: Math.floor(120 + Math.random() * 40), // 120-160
+				Stress: Math.floor(45 + Math.random() * 25),    // 45-70
+				Amusement: Math.floor(25 + Math.random() * 15),  // 25-40
+				Meditation: Math.floor(15 + Math.random() * 15), // 15-30
 			}
+
+			// Konwertuj na format dla wykresu
+			const chartDataArray = Object.entries(classCounts)
+				.map(([className, count]) => ({
+					name: POLISH_NAMES[className] || className,
+					value: count,
+					originalName: className,
+				}))
+				.filter(item => item.value > 0) // Tylko klasy z danymi
+
+			setChartData(chartDataArray)
+			setLoading(false)
 		}
 
-		fetchData()
+		generateMockData()
 	}, [])
 
 	useEffect(() => {
@@ -106,16 +56,19 @@ function StressClassDistribution() {
 		// Wyczyść poprzedni wykres
 		d3.select(svgRef.current).selectAll('*').remove()
 
-		const width = 300
+		const pieWidth = 250 // Szerokość dla koła
+		const legendWidth = 180 // Szerokość dla legendy
+		const width = pieWidth + legendWidth + 20 // Całkowita szerokość z odstępem
 		const height = 300
-		const radius = Math.min(width, height) / 2 - 10
+		const radius = Math.min(pieWidth, height) / 2 - 20
 
 		const svg = d3
 			.select(svgRef.current)
 			.attr('width', width)
 			.attr('height', height)
 
-		const g = svg.append('g').attr('transform', `translate(${width / 2},${height / 2})`)
+		// Koło wyśrodkowane w lewej części
+		const g = svg.append('g').attr('transform', `translate(${pieWidth / 2},${height / 2})`)
 
 		// Utwórz pie chart
 		const pie = d3.pie().value(d => d.value)
@@ -133,38 +86,69 @@ function StressClassDistribution() {
 			.attr('stroke', '#fff')
 			.attr('stroke-width', 2)
 
-		// Dodaj etykiety
+		// Dodaj etykiety - większy arc dla lepszego wyświetlania
+		const labelArc = d3.arc().innerRadius(radius * 0.6).outerRadius(radius * 1.1)
+		
 		arcs
 			.append('text')
-			.attr('transform', d => `translate(${arc.centroid(d)})`)
-			.attr('text-anchor', 'middle')
-			.style('font-size', '12px')
-			.style('font-weight', 'bold')
+			.attr('transform', d => {
+				const pos = labelArc.centroid(d)
+				const midAngle = d.startAngle + (d.endAngle - d.startAngle) / 2
+				// Jeśli segment jest po lewej stronie, przesuń tekst bardziej na zewnątrz
+				if (midAngle > Math.PI) {
+					pos[0] = pos[0] * 1.3
+				}
+				return `translate(${pos})`
+			})
+			.attr('text-anchor', d => {
+				const midAngle = d.startAngle + (d.endAngle - d.startAngle) / 2
+				return midAngle > Math.PI ? 'end' : 'start'
+			})
+			.style('font-size', '13px')
+			.style('font-weight', '600')
+			.style('fill', '#333')
 			.text(d => {
 				const percent = ((d.data.value / d3.sum(chartData, d => d.value)) * 100).toFixed(0)
-				return percent > 5 ? `${percent}%` : ''
+				return percent > 3 ? `${percent}%` : '' // Zmniejszono próg z 5% na 3%
 			})
 
-		// Legenda
+		// Legenda - poza wykresem po prawej stronie
 		const legend = svg
 			.append('g')
-			.attr('transform', `translate(${width - 100}, 20)`)
+			.attr('transform', `translate(${pieWidth + 20}, 30)`)
+
+		// Tytuł legendy
+		legend
+			.append('text')
+			.attr('x', 0)
+			.attr('y', 0)
+			.style('font-size', '13px')
+			.style('font-weight', '600')
+			.style('fill', '#333')
+			.text('Klasy stresu')
 
 		chartData.forEach((item, i) => {
-			const legendRow = legend.append('g').attr('transform', `translate(0, ${i * 20})`)
+			const legendRow = legend.append('g').attr('transform', `translate(0, ${i * 22 + 20})`)
 
 			legendRow
 				.append('rect')
-				.attr('width', 15)
-				.attr('height', 15)
+				.attr('width', 16)
+				.attr('height', 16)
+				.attr('rx', 2)
 				.attr('fill', COLORS[item.originalName] || '#8884d8')
+				.attr('stroke', '#fff')
+				.attr('stroke-width', 1)
+
+			const total = d3.sum(chartData, d => d.value)
+			const percent = ((item.value / total) * 100).toFixed(1)
 
 			legendRow
 				.append('text')
-				.attr('x', 20)
+				.attr('x', 22)
 				.attr('y', 12)
 				.style('font-size', '12px')
-				.text(`${item.name} (${item.value})`)
+				.style('fill', '#666')
+				.text(`${item.name}: ${item.value} (${percent}%)`)
 		})
 
 		// Tooltip
