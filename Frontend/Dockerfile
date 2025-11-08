@@ -48,7 +48,7 @@ USER nodejs
 ENV NODE_ENV=production
 
 # Wystawienie portu na 5175
-EXPOSE 5175 🎯
+EXPOSE 5175 
 
 # Dodanie Health Check na porcie 5175
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
