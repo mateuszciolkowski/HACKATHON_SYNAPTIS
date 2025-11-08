@@ -143,12 +143,12 @@ def preprocess_single_file(file_path):
 
 if __name__ == '__main__':
     # Zmień tę ścieżkę na właściwą dla Twojego pliku .pkl
-    # Upewnij się, że plik S2.pkl istnieje w folderze, w którym uruchamiasz skrypt
-    file_to_process = '../data/S3.pkl' 
+    # Upewnij się, że plik S10.pkl istnieje w folderze data/
+    file_to_process = 'data/S10.pkl' 
     
     # Analiza i przetworzenie pojedynczego pliku
     X_final, Y_final = preprocess_single_file(file_to_process)
     
     if X_final is not None:
         print("\nPrzetworzone dane są gotowe do użycia w PyTorch.")
-        # Możesz teraz wczytać plik processed_wesad_S2.npz i utworzyć z niego Tensory.
+        # Możesz teraz wczytać plik processed_wesad_S10.npz i utworzyć z niego Tensory.

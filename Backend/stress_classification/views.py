@@ -9,6 +9,7 @@ from .data_simulator import generate_simulated_data
 import numpy as np
 from datetime import datetime
 import logging
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -204,6 +205,178 @@ class StressClassificationView(APIView):
             logger.error(f"Błąd podczas klasyfikacji: {e}", exc_info=True)
             return Response(
                 {'error': 'Błąd podczas klasyfikacji', 'details': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class WESADDataView(APIView):
+    """
+    Endpoint zwracający dane z pliku processed_wesad_S10.npz w formacie odpowiednim do wykresów.
+    """
+    permission_classes = [AllowAny]
+    
+    @extend_schema(
+        summary="Dane WESAD S10 do wykresów",
+        description="""
+        Zwraca dane z pliku processed_wesad_S10.npz w formacie odpowiednim do rysowania wykresów.
+        
+        Zwraca:
+        - signals: dane sygnałów (ACC_x, ACC_y, ACC_z, BVP, EDA, TEMP) z czasem
+        - labels: etykiety dla każdego segmentu
+        - metadata: informacje o danych
+        """,
+        responses={
+            200: {
+                'description': 'Sukces - zwraca dane do wykresów',
+                'examples': {
+                    'application/json': {
+                        'signals': {
+                            'time': [0, 10, 20, ...],
+                            'ACC_x': [[...], [...], ...],
+                            'ACC_y': [[...], [...], ...],
+                            'ACC_z': [[...], [...], ...],
+                            'BVP': [[...], [...], ...],
+                            'EDA': [[...], [...], ...],
+                            'TEMP': [[...], [...], ...]
+                        },
+                        'labels': [1, 1, 2, ...],
+                        'metadata': {
+                            'num_segments': 547,
+                            'segment_duration_seconds': 30,
+                            'step_seconds': 10,
+                            'sample_rate_hz': 4
+                        }
+                    }
+                }
+            },
+            404: {'description': 'Plik nie znaleziony'},
+            500: {'description': 'Błąd serwera'}
+        }
+    )
+    def get(self, request):
+        """
+        GET /api/stress-classification/wesad-data/
+        
+        Zwraca dane z processed_wesad_S10.npz w formacie do wykresów.
+        """
+        try:
+            # Ścieżka do pliku - względem katalogu projektu
+            base_dir = Path(__file__).resolve().parent.parent.parent
+            npz_file = base_dir / 'MachineLearningService' / 'processed_wesad_S10.npz'
+            
+            if not npz_file.exists():
+                return Response(
+                    {'error': f'Plik nie znaleziony: {npz_file}'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Ładowanie danych
+            data = np.load(npz_file)
+            X = data['X']  # (547, 120, 6)
+            Y = data['Y']  # (547,)
+            
+            # Konfiguracja (zgodna z first_processing.py)
+            TARGET_RATE = 4  # Hz
+            WINDOW_SEC = 30  # sekundy
+            STEP_SEC = 10    # sekundy
+            
+            # Przygotowanie danych do wykresów
+            # Dla każdego segmentu tworzymy tablicę czasową
+            num_segments = X.shape[0]
+            segment_length = X.shape[1]  # 120 punktów
+            
+            # Czas dla każdego segmentu (w sekundach od początku segmentu)
+            time_per_segment = np.linspace(0, WINDOW_SEC, segment_length).tolist()
+            
+            # Czas globalny (od początku nagrania)
+            global_times = []
+            for i in range(num_segments):
+                segment_start_time = i * STEP_SEC
+                segment_times = [segment_start_time + t for t in time_per_segment]
+                global_times.extend(segment_times)
+            
+            # Przygotowanie sygnałów - każdy kanał jako lista wartości dla każdego segmentu
+            signals = {
+                'time': global_times,
+                'ACC_x': [],
+                'ACC_y': [],
+                'ACC_z': [],
+                'BVP': [],
+                'EDA': [],
+                'TEMP': []
+            }
+            
+            # Mapowanie kanałów: X[:, :, 0]=ACC_x, 1=ACC_y, 2=ACC_z, 3=BVP, 4=EDA, 5=TEMP
+            channel_names = ['ACC_x', 'ACC_y', 'ACC_z', 'BVP', 'EDA', 'TEMP']
+            
+            for segment_idx in range(num_segments):
+                segment_data = X[segment_idx]  # (120, 6)
+                
+                for channel_idx, channel_name in enumerate(channel_names):
+                    channel_values = segment_data[:, channel_idx].tolist()
+                    signals[channel_name].extend(channel_values)
+            
+            # Etykiety z mapowaniem nazw
+            LABEL_MAP = {
+                0: 'transient/not_defined',
+                1: 'baseline',
+                2: 'stress',
+                3: 'amusement',
+                4: 'meditation'
+            }
+            
+            labels_data = []
+            for i, label_id in enumerate(Y):
+                segment_start_time = i * STEP_SEC
+                segment_end_time = segment_start_time + WINDOW_SEC
+                labels_data.append({
+                    'segment_index': int(i),
+                    'label_id': int(label_id),
+                    'label_name': LABEL_MAP.get(int(label_id), f'unknown_{int(label_id)}'),
+                    'start_time_seconds': segment_start_time,
+                    'end_time_seconds': segment_end_time,
+                    'duration_seconds': WINDOW_SEC
+                })
+            
+            # Statystyki etykiet
+            unique_labels, counts = np.unique(Y, return_counts=True)
+            label_statistics = []
+            for label_id, count in zip(unique_labels, counts):
+                label_statistics.append({
+                    'label_id': int(label_id),
+                    'label_name': LABEL_MAP.get(int(label_id), f'unknown_{int(label_id)}'),
+                    'count': int(count),
+                    'percentage': float((count / num_segments) * 100)
+                })
+            
+            # Przygotowanie odpowiedzi
+            response_data = {
+                'signals': signals,
+                'labels': labels_data,
+                'label_statistics': label_statistics,
+                'metadata': {
+                    'num_segments': int(num_segments),
+                    'segment_duration_seconds': WINDOW_SEC,
+                    'step_seconds': STEP_SEC,
+                    'sample_rate_hz': TARGET_RATE,
+                    'points_per_segment': segment_length,
+                    'total_duration_seconds': int(num_segments * STEP_SEC),
+                    'total_points': len(global_times)
+                }
+            }
+            
+            return Response(response_data, status=status.HTTP_200_OK)
+            
+        except FileNotFoundError as e:
+            logger.error(f"Nie znaleziono pliku: {e}")
+            return Response(
+                {'error': 'Plik nie znaleziony', 'details': str(e)},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            logger.error(f"Błąd podczas ładowania danych: {e}", exc_info=True)
+            return Response(
+                {'error': 'Błąd podczas ładowania danych', 'details': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
