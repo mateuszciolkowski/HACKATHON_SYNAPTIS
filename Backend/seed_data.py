@@ -22,24 +22,42 @@ MIN_VISITS = 2
 MAX_VISITS = 3
 MIN_STRESS_ENTRIES = 15
 MAX_STRESS_ENTRIES = 40
+# Nowa stała: interwał między pomiarami
+TIME_INTERVAL = timedelta(seconds=10) 
 
 def generate_stress_history(visit_date):
-    """Generuje losową tablicę historii stresu dla pola JSONField z dużą liczbą wpisów."""
+    """Generuje losową tablicę historii stresu z wpisami co 10 sekund."""
     history = []
     num_entries = random.randint(MIN_STRESS_ENTRIES, MAX_STRESS_ENTRIES)
     
-    # Generowanie wpisów z timestampami z 7 dni przed wizytą
+    # 1. Obliczamy całkowity czas trwania historii na podstawie liczby wpisów i interwału
+    total_duration = (num_entries - 1) * TIME_INTERVAL
+    
+    # 2. Ustawiamy czas startowy (najstarszy wpis)
+    # Zapewniamy, że czas startowy jest nie wcześniej niż 7 dni przed wizytą
+    max_start_offset = timedelta(days=7)
+    
+    # Losowy offset od 0 do 7 dni
+    random_days_offset = timedelta(days=random.uniform(0, 7))
+    
+    # Czas startowy: data wizyty minus cały czas trwania historii i minus losowy offset
+    start_time = visit_date - total_duration - random_days_offset 
+    
+    
+    # 3. Iteracyjne dodawanie wpisów co 10 sekund
+    current_time = start_time
     for _ in range(num_entries):
-        # Odejmij losową ilość czasu do 7 dni wstecz
-        entry_time = visit_date - timedelta(days=random.uniform(0, 7), hours=random.uniform(0, 24))
         
+        # Tworzenie wpisu
         history.append({
-            "timestamp": entry_time.isoformat(),
+            "timestamp": current_time.isoformat(),
             "stress_level": random.randint(1, 10)  # Poziom stresu 1-10
         })
+        
+        # Inkrementacja czasu o 10 sekund
+        current_time += TIME_INTERVAL
     
-    # Sortowanie wpisów chronologicznie
-    history.sort(key=lambda x: x['timestamp'])
+    # Sortowanie nie jest już konieczne, ponieważ czas jest inkrementowany w porządku
     return history
 
 
@@ -47,8 +65,9 @@ def run_seed():
     """Główna funkcja do dodawania losowych danych."""
     print(f"--- Rozpoczynam dodawanie {NUM_PATIENTS} pacjentów z {MIN_VISITS}-{MAX_VISITS} wizytami ---")
     
-    Patient.objects.all().delete() # Opcjonalnie: usuń wszystkie stare dane przed startem
-    Visit.objects.all().delete() # Opcjonalnie: usuń wszystkie stare dane przed startem
+    # Opcjonalnie: usuń stare dane przed startem
+    Patient.objects.all().delete() 
+    Visit.objects.all().delete() 
 
     for i in range(NUM_PATIENTS):
         # 1. Tworzenie losowego pacjenta
@@ -57,7 +76,8 @@ def run_seed():
         
         # Tworzymy unikalny PESEL
         pesel_base = str(random.randint(40, 99)) + str(random.randint(10, 12)) + str(random.randint(10, 31))
-        pesel = pesel_base + str(random.randint(10000, 99999))
+        # Zapewnienie, że PESEL ma 11 cyfr
+        pesel = pesel_base + str(random.randint(1000, 99999)).zfill(5)
         
         try:
             patient = Patient.objects.create(
@@ -65,6 +85,7 @@ def run_seed():
                 last_name=fake.last_name(),
                 dob=fake.date_of_birth(minimum_age=18, maximum_age=85),
                 gender=gender_choice,
+                # Faker.unique.numerify('###########') byłby bezpieczniejszy dla unikalności
                 pesel=pesel,
                 notes=fake.paragraph(nb_sentences=2, variable_nb_sentences=True)
             )
@@ -81,7 +102,7 @@ def run_seed():
             # Ustawienie daty wizyty na losowy dzień z ostatnich 365 dni
             visit_date = timezone.now() - timedelta(days=random.randint(1, 365), hours=random.randint(0, 23))
             
-            # Generowanie struktury dla pola JSONField z dużą ilością danych
+            # Generowanie struktury dla pola JSONField z dużą ilością danych co 10 sekund
             stress_data = generate_stress_history(visit_date)
             
             try:
@@ -92,7 +113,7 @@ def run_seed():
                     psychologist_notes=fake.text(max_nb_chars=500),
                     ai_summary=fake.text(max_nb_chars=200)
                 )
-                print(f"   -> Dodano wizytę {v+1}/{num_visits} z {len(stress_data)} wpisami stresu.")
+                print(f"   -> Dodano wizytę {v+1}/{num_visits} z {len(stress_data)} wpisami stresu (co 10s).")
             
             except Exception as e:
                 print(f"   ❌ Błąd przy tworzeniu wizyty: {e}")
