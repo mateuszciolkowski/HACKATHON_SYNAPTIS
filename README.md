@@ -117,10 +117,10 @@ Dane te są automatycznie analizowane, klasyfikowane i wizualizowane w panelu te
 ## 👥 Zespół
 
 **Synaptis Team**  
-Mateusz Ciołkowski - backend, devops
-Aleksander Kaźmierczka - backend, analiza danych 
-Szymon Kaźmierczak - frontend
-Filip Wasiel - frontend
+Mateusz Ciołkowski - backend, devops<br>
+Aleksander Kaźmierczka - backend, analiza danych<br>
+Szymon Kaźmierczak - frontend<br>
+Filip Wasiel - frontend<br>
 
 ---
 
