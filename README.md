@@ -34,6 +34,23 @@ Celem projektu jest **lepsze zrozumienie emocji i stresu** pacjentów poprzez po
 
 ---
 
+<p align="center"> <img src="img/landing.png" alt="Synaptis - strona główna z opisem platformy i wezwaniem do działania" width="800"/> </p>
+
+---
+
+<p align="center"> <img src="img/1.png" alt="Dashboard z listą pacjentów i nadchodzącymi sesjami" width="800"/> </p>
+
+---
+
+<p align="center"> <img src="img/2.png" alt="Analiza emocji z sesji - wykresy EDA, HR i stresu w czasie" width="800"/> </p>
+
+---
+
+<p align="center"> <img src="img/3.png" alt="Interaktywna mapa emocji zsynchronizowana z nagraniem rozmowy" width="800"/> </p>
+
+---
+
+
 ## 🚀 Kluczowe funkcje
 
 - 🩺 **Analiza biometryczna** – przetwarzanie EDA, HR i wskaźników stresu  

@@ -102,7 +102,7 @@ DATABASES = {
         'NAME': os.getenv('POSTGRES_DB'),
         'USER': os.getenv('POSTGRES_USER'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-        'HOST': 'db_hackathon',  
+        'HOST': 'synaptis_db_hackathon',  
         'PORT': '5432',     
     }
 }

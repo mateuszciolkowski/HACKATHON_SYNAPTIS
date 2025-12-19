@@ -2,7 +2,7 @@
 set -e
 # Wait for database to be ready
 echo "Waiting for PostgreSQL..."
-while ! pg_isready -h db_hackathon -p 5432 -U $POSTGRES_USER -d $POSTGRES_DB; do
+while ! pg_isready -h synaptis_db_hackathon -p 5432 -U $POSTGRES_USER -d $POSTGRES_DB; do
     sleep 1
 done
 echo "PostgreSQL started"
